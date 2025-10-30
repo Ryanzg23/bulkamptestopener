@@ -17,11 +17,15 @@
       margin: 0;
       padding: 30px 10px;
     }
+  h2 {
+    color: #fff;
+    margin-bottom: 15px;
+  }
 
     textarea {
       width: 90%;
       max-width: 600px;
-      height: 200px;
+      height: 150px;
       background: #222;
       color: #fff;
       border: 1px solid #444;
@@ -45,22 +49,31 @@
       background: #28a745;
       color: white;
     }
-	  #validateBtn:hover{ background: #07681d; } 
 
     #openAllBtn {
       background: #007bff;
       color: white;
       margin-left: 10px;
     }
-	  
-	  #openAllBtn:hover{ background: #07488f; } 
+
+    #copyAllBtn {
+      background: #ff9800;
+      color: white;
+      margin-left: 10px;
+      display: none; /* hidden until links are generated */
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
 
     .note {
       margin-top: 20px;
-      font-size: 17px;
+      font-size: 14px;
       color: #ccc;
       text-align: center;
       max-width: 600px;
+      line-height: 1.6;
     }
 
     .results {
@@ -102,6 +115,12 @@
       color: #ccc;
       border-color: #555;
     }
+
+    .copied {
+      color: #4caf50;
+      font-size: 14px;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -109,25 +128,31 @@
   <textarea id="urls" placeholder="Enter URLs here (one per line)..."></textarea>
   <div>
     <button id="validateBtn">Generate AMP Test Links</button>
-    <button id="openAllBtn">Open All in New Tabs</button>
+    <button id="openAllBtn">Open All</button>
+    <button id="copyAllBtn">Copy All Links</button>
   </div>
   <p class="note">
     ⚠️ Note: “Open All” opens multiple tabs at once.<br>
-    - Please make sure to <strong>allow pop-ups</strong> in your browser for it to work.<br>
-	  - If you don't want to allow popups on your browser, you can just click Generate button to open them manually.
+    Please make sure to <strong>allow pop-ups</strong> in your browser for it to work.<br><br>
+    💡 You can also <strong>copy all links</strong> and open them in your own URL bulk opener tool.
   </p>
 
+  <p id="copyMsg" class="copied" style="display:none;">✅ All links copied to clipboard!</p>
   <div class="results" id="results"></div>
 
   <script>
     const validateBtn = document.getElementById('validateBtn');
     const openAllBtn = document.getElementById('openAllBtn');
+    const copyAllBtn = document.getElementById('copyAllBtn');
     const textarea = document.getElementById('urls');
     const resultsDiv = document.getElementById('results');
+    const copyMsg = document.getElementById('copyMsg');
 
     validateBtn.addEventListener('click', () => {
       const urls = textarea.value.trim().split('\n').map(u => u.trim()).filter(u => u);
       resultsDiv.innerHTML = '';
+      copyAllBtn.style.display = 'none';
+      copyMsg.style.display = 'none';
 
       if (urls.length === 0) {
         resultsDiv.innerHTML = '<p style="color:#f77;">Please enter at least one URL.</p>';
@@ -140,6 +165,7 @@
       }).join('');
 
       resultsDiv.innerHTML = `<h3>Generated AMP Test Links:</h3>${linkButtons}`;
+      copyAllBtn.style.display = 'inline-block';
 
       // Add click event to mark clicked links
       document.querySelectorAll('.amp-link').forEach(link => {
@@ -163,8 +189,20 @@
         }, index * 400); // small delay between openings
       });
     });
+
+    copyAllBtn.addEventListener('click', () => {
+      const urls = textarea.value.trim().split('\n').map(u => u.trim()).filter(u => u);
+      if (urls.length === 0) {
+        alert('Please enter at least one URL first.');
+        return;
+      }
+
+      const allLinks = urls.map(url => `https://search.google.com/test/amp?url=${encodeURIComponent(url)}`).join('\n');
+      navigator.clipboard.writeText(allLinks).then(() => {
+        copyMsg.style.display = 'block';
+        setTimeout(() => copyMsg.style.display = 'none', 2500);
+      });
+    });
   </script>
 </body>
 </html>
-
-
